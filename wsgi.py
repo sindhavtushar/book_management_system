@@ -1,4 +1,5 @@
 import os
+import logging
 from bson import ObjectId
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
@@ -16,13 +17,14 @@ if not database_url:
     raise ValueError("DATABASE_URL is not set")
 
 app.secret_key = secret_key
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
 try:
     client = MongoClient(database_url, serverSelectionTimeoutMS=5000)
     client.server_info()  # Force connection
-    print("Connected to MongoDB successfully")
+    logging.info("MongoDB connected successfully")
 except Exception as e:
-    print("Unable to connect with MongoDB:", e)
+    logging.info("Unable to connect with MongoDB:\n{e}")
 
 db = client["bookdb"]
 books_collection = db["books"]
@@ -49,13 +51,12 @@ def books_list():
 @app.route('/books/add/', methods=["POST"])
 def add_book():
     new_book = request.get_json()
-    print("[DEBUG]", new_book)
     try:
         if new_book:
             books_collection.insert_one(new_book)
             return jsonify({"msg":"Book added Successfully!"}), 201
     except Exception as e:
-        print("Problem while adding book record", e)
+        return jsonify({"msg": f"Problem while adding book record: {e}"}), 500
     return jsonify({"msg":"Invalid Request!"}), 400
 
 @app.route("/books/<id>/", methods=["GET"])
@@ -74,16 +75,13 @@ def book_detail(id):
         # Convert ObjectId to string for JSON
         book_details["_id"] = str(book_details["_id"])
 
-        print(f'[DEBUG] BOOK found: \n{book_details}')
-
         return jsonify({"msg": "Book found!", "data": book_details}), 200
 
     except Exception as e:
-        print(f"[DEBUG] Book searching failed due to: {e}")
         return jsonify({"msg": "Book searching failed", "error": str(e)}), 500
 
 # Update a book
-@app.route('/books/<id>/update/', methods=["GET", "PUT"])
+@app.route('/books/<id>/update/', methods=["PATCH"])
 def update_book(id):
 
     if not ObjectId.is_valid(id):
@@ -91,7 +89,11 @@ def update_book(id):
 
     item_id = ObjectId(id)
 
-    if request.method == "PUT":
+    itm = books_collection.find_one({"_id": item_id})
+    if not itm:
+        return jsonify({"error": "Book not found"}), 404
+
+    if request.method == "PATCH":
         updated_data = request.json
         result = books_collection.update_one(
             {"_id": item_id},
@@ -103,39 +105,33 @@ def update_book(id):
         else:
             return jsonify({"message": "No changes made or item not found"}), 404
 
-    itm = books_collection.find_one({"_id": item_id})
-    if not itm:
-        return jsonify({"error": "Book not found"}), 404
-
     itm["_id"] = str(itm["_id"])  # convert before returning
     return jsonify(itm)
 
 # Delete a book by Id
-@app.route('/books/<id>/delete', methods=["DELETE"])
+@app.route('/books/<id>/delete/', methods=["DELETE"])
 def delete_book(id):
-    
     if not ObjectId.is_valid(id):
         return jsonify({"error": "Invalid book ID"}), 400
-    
-    item_id = ObjectId(id)
 
-    if request.method == "DELETE":
-        try:
-            del_res = books_collection.delete_one({"_id": item_id})
-            print(f'[DEBUG]: Delete Result: \n{del_res}')
-            return jsonify({"msg":"Record Deleted Successfyll!"})
-        except Exception as e:
-            print(f'[DEBUG]: Error while Delete : \n{e}')
-            res = f"Error while deleting record {e}"
-            return jsonify({"msg":res})
-        
-    itm = books_collection.find_one({"_id": item_id})
-    if not itm:
+    item_id = ObjectId(id)
+    book = books_collection.find_one({"_id": item_id})
+
+    if not book:
         return jsonify({"error": "Book not found"}), 404
 
-    itm["_id"] = str(itm["_id"])  # convert before returning
-    return jsonify(itm)
-
+    try:
+        del_res = books_collection.delete_one({"_id": item_id})
+        if del_res.deleted_count == 1:
+            book["_id"] = str(book["_id"])  # Convert ObjectId to string
+            return jsonify({
+                "msg": "Record Deleted Successfully!",
+                "deleted_book": book
+            }), 200
+        else:
+            return jsonify({"error": "Record not found or already deleted"}), 404
+    except Exception as e:
+        return jsonify({"error": f"Error while deleting record: {e}"}), 500
 
 if __name__ == "__main__":
     app.run(debug=debug_mode)
