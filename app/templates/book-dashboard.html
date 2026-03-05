@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %} Dashboard {% endblock %}
+
+{% block content %}
+
+<h2 class="page-title">📚 Book Management Dashboard</h2>
+
+<div id="data-container" class="book-grid">
+    Loading books...
+</div>
+
+<style>
+    .page-title {
+        margin-bottom: 20px;
+    }
+
+    /* Grid layout */
+    .book-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    /* Card design */
+    .book-card {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 15px;
+        background: white;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        transition: 0.3s;
+    }
+
+    .book-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .book-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+
+    .book-author {
+        color: #666;
+        margin-bottom: 15px;
+    }
+
+    /* Button */
+    .detail-btn {
+        display: inline-block;
+        padding: 8px 14px;
+        background: #007bff;
+        color: white;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .detail-btn:hover {
+        background: #0056b3;
+    }
+</style>
+
+<script>
+    fetch('/api/books/list/')
+        .then(response => response.json())
+        .then(data => {
+
+            const container = document.getElementById('data-container');
+            container.innerHTML = '';
+
+            data.forEach(item => {
+
+                const card = document.createElement('div');
+                card.className = "book-card";
+
+                card.innerHTML = `
+                    <div class="book-title">${item.title}</div>
+                    <div class="book-author">${item.author}</div>
+
+                    <a href="/books/${item._id}/" class="detail-btn">
+                        View Details →
+                    </a>
+                `;
+
+                container.appendChild(card);
+            });
+
+        })
+        .catch(error => console.error('Error fetching data:', error));
+</script>
+
+{% endblock %}

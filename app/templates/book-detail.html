@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Book Detail{% endblock %}
+
+{% block content %}
+
+<h2>📖 Book Detail</h2>
+
+<div id="data-container">Loading...</div>
+
+<script>
+
+const bookId = "{{ bookId }}";
+
+fetch(`/api/books/${bookId}/`)
+.then(response => response.json())
+.then(data => {
+
+    const book = data.data;
+
+    const container = document.getElementById("data-container");
+
+    container.innerHTML = `
+        <div style="border:1px solid #ddd;padding:20px;border-radius:10px;width:400px">
+            <a href="/books/dashboard/">⬅ Back</a>
+
+            <h3>${book.title}</h3>
+
+            <p><strong>Author:</strong> ${book.author}</p>
+            ${book.year ? `<p><strong>Year:</strong> ${book.year}</p>` : ""}
+            ${book.price ? `<p><strong>Price:</strong> ₹${book.price}</p>` : ""}
+            ${book.pages ? `<p><strong>Pages:</strong> ${book.pages}</p>` : ""}
+            ${book.country ? `<p><strong>Country:</strong> ${book.country}</p>` : ""}
+            ${book.language ? `<p><strong>Language:</strong> ${book.language}</p>` : ""}
+
+
+        </div>
+    `;
+})
+.catch(error => console.error("Error:", error));
+
+</script>
+
+{% endblock %}

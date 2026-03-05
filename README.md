@@ -1,6 +1,6 @@
 # Book Management API
 
-A simple RESTful Book Management API built with **Flask** and **MongoDB**.  
+A simple app serving HTML views and REST API endpoints, built with **Flask** and **MongoDB**.  
 This API allows you to create, read, update, and delete books from a MongoDB database.
 
 ---
@@ -31,10 +31,26 @@ This API allows you to create, read, update, and delete books from a MongoDB dat
 ```
 
 .
-├── wsgi.py
-├── requirements.txt
-├── .env
-├── .gitignore
+│   .env
+│   .gitignore
+│   README.md
+│   requirements.txt
+│   wsgi.py
+│
+├───app
+│   │   __init__.py
+│   │
+│   ├───api
+│   │   │   books.py
+│   │
+│   ├───templates
+│   │       base.html
+│   │       book-dashboard.html
+│   │       book-detail.html
+│   │       index.html
+│   │
+│   ├───views
+│   │   │   books.py
 
 ```
 
@@ -66,7 +82,7 @@ DEBUG_MODE = True/False for debug mode
 
 ```
 
-git clone <your-repo-url>
+git clone <repo-url>
 cd <your-project-folder>
 
 ```
@@ -129,7 +145,7 @@ Server will start at:
 
 ## 1 Health Check
 
-### `GET /`
+### `GET /api/`
 
 **Response**
 ```json
@@ -142,7 +158,7 @@ Server will start at:
 
 ## 2️ List All Books
 
-### `GET /books/list/`
+### `GET /api/books/list/`
 
 Returns all books in the database.
 
@@ -150,7 +166,7 @@ Returns all books in the database.
 
 ## 3️ Add a Book
 
-### `POST /books/add/`
+### `POST /api/books/add/`
 
 **Request Body**
 
@@ -174,7 +190,7 @@ Returns all books in the database.
 
 ## 4️ Get Book by ID
 
-### `GET /books/<id>/`
+### `GET /api/books/<id>/`
 
 Returns a single book by MongoDB ObjectId.
 
@@ -182,7 +198,7 @@ Returns a single book by MongoDB ObjectId.
 
 ## 5️ Update Book
 
-### `PATCH /books/<id>/update/`
+### `PATCH /api/books/<id>/update/`
 
 **Request Body**
 
@@ -204,7 +220,7 @@ Returns a single book by MongoDB ObjectId.
 
 ## 6️ Delete Book
 
-### `DELETE /books/<id>/delete/`
+### `DELETE /api/books/<id>/delete/`
 
 **Response**
 
@@ -225,6 +241,30 @@ You can test the API using:
 * curl
 
 ---
+
+# UI Routes (Template Views)
+
+These routes render HTML pages using Flask templates. Defined in `app/views/books.py`, they use templates from `app/templates/`.
+
+| Route | Template | Description |
+|-------|---------|-------------|
+| `/` | `index.html` | Home page |
+| `/books/dashboard/` | `book-dashboard.html` | Books dashboard page |
+| `/books/<id>/` | `book-detail.html` | Book detail page (uses `bookId` parameter) |
+
+### Example Usage
+
+- Open a browser and go to `/` to view the home page.
+- Navigate to `/books/dashboard/` to view the dashboard UI.
+- Navigate to `/books/<id>/` to view details of a specific book.
+
+### Data Fetching
+
+- The templates fetch data from the API endpoints using JavaScript (fetch):
+- book-dashboard.html → fetches /api/books/list/ to display all books.
+- book-detail.html → fetches /api/books/id/ to show details for a single book.
+
+- This makes the UI dynamic while keeping the API reusable for external clients.
 
 ## Important Notes
 

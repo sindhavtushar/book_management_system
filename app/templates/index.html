@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block title %}Index{% endblock %}
+
+{% block content %}
+<p class="important">Welcome to Book Management System</p>
+Go to <a href="{{ url_for('views.book_dashboard') }}">Dashboard</a>
+{% endblock %}
