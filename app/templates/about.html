@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+
+<div class="project-description" style="margin: 20px 20px 20px 20px">
+    <a href="/" class="btn btn-secondary btn-lg">
+        <i class="fa-solid fa-backward"></i> Back to Home
+    </a>
+    <h1>📚 About This Project</h1>
+    <p>This Book Management System demonstrates how MongoDB can be used to store and manage books with flexible data
+        fields. Users can add, edit, and view detailed book information efficiently.</p>
+
+    <h3>Key Features</h3>
+    <ul>
+        <li>Add books with standard and custom fields</li>
+        <li>Edit and view detailed book info</li>
+        <li>Flexible data storage using MongoDB</li>
+        <li>User-friendly dashboard and interface</li>
+    </ul>
+
+    <p>Learn more on <a href="https://github.com/sindhavtushar/book_management_system" target="_blank">GitHub</a></p>
+</div>
+
+{% include 'footer.html' %}
+{% endblock %}

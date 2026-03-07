@@ -1,8 +1,39 @@
 {% extends "base.html" %}
 
-{% block title %}Index{% endblock %}
+{% block title %}Welcome{% endblock %}
 
 {% block content %}
-<p class="important">Welcome to Book Management System</p>
-Go to <a href="{{ url_for('views.book_dashboard') }}">Dashboard</a>
+
+<div class="landing-page" style="margin-left: 20px;">
+
+    <div class="landing-hero">
+        <h1>📚 Welcome to the Book Management System</h1>
+        <p class="lead-text">Manage your books easily, add, edit, and view detailed information all in one place.</p>
+
+        <div class="landing-actions">
+            <a href="{{ url_for('views.book_dashboard') }}" class="btn btn-primary btn-lg">
+                Go to Dashboard
+            </a>
+            <a href="/about" class="btn btn-secondary btn-lg">
+                Learn More
+            </a>
+        </div>
+    </div>
+
+    <div class="landing-info">
+        <div class="info-card">
+            <h3>Organize Books</h3>
+            <p>Keep track of all your books with detailed information and custom fields.</p>
+        </div>
+        <div class="info-card">
+            <h3>Easy Editing</h3>
+            <p>Edit book details quickly with a clean and responsive interface.</p>
+        </div>
+        <div class="info-card">
+            <h3>Flexible Data</h3>
+            <p>Add custom fields to any book. MongoDB makes your data flexible and scalable.</p>
+        </div>
+    </div>
+
+</div>
 {% endblock %}

@@ -1,96 +1,297 @@
 {% extends "base.html" %}
 
-{% block title %} Dashboard {% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
 
-<h2 class="page-title">📚 Book Management Dashboard</h2>
+<div class="page-container">
 
-<div id="data-container" class="book-grid">
-    Loading books...
+    <h2 class="page-title">Book Management Dashboard</h2>
+
+    <!-- Action Bar -->
+    <div class="action-bar action-bar-top">
+        <a href="/" class="btn btn-secondary btn-sm">
+            <i class="fa-solid fa-backward"></i> Back to Home
+        </a>
+
+        <button class="btn btn-primary" onclick="openAddBookModal()">
+            <i class="fa-solid fa-plus"></i> Add Book
+        </button>
+    </div>
+
+
+    <!-- Book Grid -->
+    <div id="data-container" class="book-grid">
+        <p>Loading books...</p>
+    </div>
+
 </div>
 
-<style>
-    .page-title {
-        margin-bottom: 20px;
-    }
 
-    /* Grid layout */
-    .book-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 20px;
-    }
+<!-- =========================
+        Add Book Modal
+========================= -->
 
-    /* Card design */
-    .book-card {
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        padding: 15px;
-        background: white;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-        transition: 0.3s;
-    }
+<div id="popupOverlay" class="overlay">
 
-    .book-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-    }
+    <div class="popup-content">
 
-    .book-title {
-        font-size: 18px;
-        font-weight: bold;
-        margin-bottom: 8px;
-    }
+        <button class="btn btn-danger modal-close" onclick="closeAddBookModal()">✕</button>
 
-    .book-author {
-        color: #666;
-        margin-bottom: 15px;
-    }
+        <h2>Add Book</h2>
 
-    /* Button */
-    .detail-btn {
-        display: inline-block;
-        padding: 8px 14px;
-        background: #007bff;
-        color: white;
-        border-radius: 6px;
-        text-decoration: none;
-        font-size: 14px;
-    }
+        <form id="AddBookForm" class="book-form">
 
-    .detail-btn:hover {
-        background: #0056b3;
-    }
-</style>
+            <label>Title <span style="color: red;">&#42;</span></label>
+            <input type="text" name="title" required>
+
+            <label>Author <span style="color: red;">&#42;</span></label>
+            <input type="text" name="author" required>
+
+            <label>Year <span style="color: red;">&#42;</span></label>
+            <input type="number" name="year">
+            
+            <label>Language <span style="color: red;">&#42;</span></label>
+            <input type="text" name="language">
+
+            <label>Price</label>
+            <input type="number" name="price" step="0.01">
+
+            <label>Images (paste link or Upload)</label>
+            <input type="text" name="image">
+
+
+            <!-- Custom Fields -->
+            <h3>Custom Fields</h3>
+
+            <div id="customFields"></div>
+
+            <div style="margin-top:10px;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="addField()">
+                    + Add Field
+                </button>
+            </div>
+
+            <div style="margin-top:15px;">
+                <button type="submit" class="btn btn-success">
+                    Save Book
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
 
 <script>
-    fetch('/api/books/list/')
-        .then(response => response.json())
-        .then(data => {
 
-            const container = document.getElementById('data-container');
-            container.innerHTML = '';
+    const overlay = document.getElementById("popupOverlay");
+    const container = document.getElementById("data-container");
+    const form = document.getElementById("AddBookForm");
+    const customFields = document.getElementById("customFields");
 
-            data.forEach(item => {
 
-                const card = document.createElement('div');
-                card.className = "book-card";
+    /* =========================
+       Load Books
+    ========================= */
 
-                card.innerHTML = `
-                    <div class="book-title">${item.title}</div>
-                    <div class="book-author">${item.author}</div>
+    function loadBooks() {
 
-                    <a href="/books/${item._id}/" class="detail-btn">
-                        View Details →
+        fetch('/api/books/list/')
+            .then(res => res.json())
+            .then(data => {
+
+                container.innerHTML = "";
+
+                if (!data.length) {
+                    container.innerHTML = "<p>No books available.</p>";
+                    return;
+                }
+
+                data.forEach(book => {
+
+                    const card = document.createElement("div");
+                    card.className = "book-card";
+
+                    card.innerHTML = `
+                    <div class="book-title">${book.title}</div>
+                    <div class="book-author">${book.author}</div>
+
+                    <a href="/books/${book._id}/" class="btn btn-primary btn-sm">
+                        View Details <i class="fa fa-book"></i>
                     </a>
                 `;
 
-                container.appendChild(card);
+                    container.appendChild(card);
+
+                });
+
+            })
+            .catch(err => {
+
+                console.error(err);
+
+                container.innerHTML =
+                    "<p>❌ Failed to load books.</p>";
+
             });
 
+    }
+
+    loadBooks();
+
+
+
+    /* =========================
+       Modal Controls
+    ========================= */
+
+    function openAddBookModal() {
+
+        overlay.style.display = "flex";
+        document.body.style.overflow = "hidden";
+
+    }
+
+    function closeAddBookModal() {
+
+        overlay.style.display = "none";
+        document.body.style.overflow = "auto";
+
+    }
+
+
+
+    /* =========================
+       Close modal on outside click
+    ========================= */
+
+    overlay.addEventListener("click", function (event) {
+
+        if (event.target === overlay) {
+            closeAddBookModal();
+        }
+
+    });
+
+
+
+    /* =========================
+       ESC closes modal
+    ========================= */
+
+    document.addEventListener("keydown", function (event) {
+
+        if (event.key === "Escape") {
+            closeAddBookModal();
+        }
+
+    });
+
+
+
+    /* =========================
+       Add Custom Field
+    ========================= */
+
+    function addField() {
+
+        const row = document.createElement("div");
+        row.className = "custom-field-row";
+
+        row.innerHTML = `
+        <input type="text" placeholder="Field name" class="field-name">
+        <input type="text" placeholder="Value" class="field-value">
+        <button type="button" class="btn btn-danger btn-sm">✕</button>
+    `;
+
+        row.querySelector("button").onclick = () => row.remove();
+
+        customFields.appendChild(row);
+
+    }
+
+
+
+    /* =========================
+       Submit Form
+    ========================= */
+
+    form.addEventListener("submit", function (e) {
+
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const newBook = Object.fromEntries(formData.entries());
+
+
+        /* collect dynamic fields */
+
+        const names = document.querySelectorAll(".field-name");
+        const values = document.querySelectorAll(".field-value");
+
+        names.forEach((name, index) => {
+
+            if (name.value.trim()) {
+                newBook[name.value.trim()] = values[index].value.trim();
+            }
+
+        });
+
+
+        /* remove empty fields */
+
+        Object.keys(newBook).forEach(key => {
+
+            if (!newBook[key]) {
+                delete newBook[key];
+            }
+
+        });
+
+
+        fetch('/api/books/add/', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(newBook)
         })
-        .catch(error => console.error('Error fetching data:', error));
+            .then(res => res.json())
+            .then(res => {
+
+                if (res.msg && res.msg.includes("Successfully")) {
+
+                    alert("✅ Book added successfully");
+
+                    closeAddBookModal();
+                    loadBooks();
+
+                    form.reset();
+                    customFields.innerHTML = "";
+
+                }
+                else {
+
+                    alert("❌ Error: " + JSON.stringify(res));
+
+                }
+
+            })
+            .catch(err => {
+
+                console.error("Add book error:", err);
+                alert("Server error while adding book");
+
+            });
+
+    });
+
 </script>
+
+
+{% include 'footer.html' %}
 
 {% endblock %}

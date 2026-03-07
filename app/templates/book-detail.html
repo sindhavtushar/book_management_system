@@ -3,42 +3,249 @@
 {% block title %}Book Detail{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/book_detail.css') }}">
 
-<h2>📖 Book Detail</h2>
+<div class="book-page">
 
-<div id="data-container">Loading...</div>
+    <!-- Header -->
+    <div class="book-header">
+        <a href="/books/dashboard/" class="btn-back"><i class="fa-solid fa-backward"></i> Back</a>
+        <h1>Book Detail</h1>
+    </div>
+
+    <!-- Book Card -->
+    <div id="bookCard" class="book-card">
+        <div class="loading-msg">Loading book details...</div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="overlay">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeEditModal()">✕</button>
+        <h2>Edit Book</h2>
+        <div id="editMsg" class="form-msg"></div>
+        <form id="editBookForm" class="book-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="editTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Author</label>
+                    <input type="text" id="editAuthor" name="author" required>
+                </div>
+                <div class="form-group">
+                    <label>Year</label>
+                    <input type="number" id="editYear" name="year">
+                </div>
+                <div class="form-group">
+                    <label>Price</label>
+                    <input type="number" id="editPrice" name="price" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Pages</label>
+                    <input type="number" id="editPages" name="pages">
+                </div>
+                <div class="form-group">
+                    <label>Country</label>
+                    <input type="text" id="editCountry" name="country">
+                </div>
+                <div class="form-group">
+                    <label>Language</label>
+                    <input type="text" id="editLanguage" name="language">
+                </div>
+            </div>
+
+            <h3>Additional Fields</h3>
+            <div id="editAdditionalFields"></div>
+            <button type="button" class="btn-add-field" onclick="addEditField()"><i class="fa fa-plus"></i> Add
+                Field</button>
+
+            <button type="submit" class="btn-save">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+<!-- Dynamic Field Template -->
+<template id="dynamicFieldTemplate">
+    <div class="dynamic-field">
+        <input type="text" class="edit-extra-name" placeholder="Field Name">
+        <input type="text" class="edit-extra-value" placeholder="Value">
+        <button type="button" class="btn-remove">✕</button>
+    </div>
+</template>
 
 <script>
+    const bookId = "{{ bookId }}";
+    let currentBook = {};
+    const baseFields = ["title", "author", "year", "price", "pages", "country", "language", "image"];
+    let isFormDirty = false;
 
-const bookId = "{{ bookId }}";
+    // Load book details
+    async function loadBook() {
+        const container = document.getElementById('bookCard');
+        container.innerHTML = '<div class="loading-msg">Loading book details...</div>';
+        try {
+            const res = await fetch(`/api/books/${bookId}/`);
+            const data = await res.json();
+            currentBook = data.data;
 
-fetch(`/api/books/${bookId}/`)
-.then(response => response.json())
-.then(data => {
+            container.innerHTML = `
+        <div class="book-info-wrapper">
+            <div class="book-thumbnail">
+                ${currentBook.image ? `<img src="${currentBook.image}" alt="${currentBook.title}">` : `<i class="fa fa-book fa-6x text-secondary"></i>`}
+            </div>
+            <div class="book-info">
+                <h2>${currentBook.title || "-"}</h2>
+                <p><strong>Author:</strong> ${currentBook.author || "-"}</p>
+                <p><strong>Year:</strong> ${currentBook.year || "-"}</p>
+                <p><strong>Price:</strong> ₹${currentBook.price || "-"}</p>
+                <p><strong>Pages:</strong> ${currentBook.pages || "-"}</p>
+                <p><strong>Country:</strong> ${currentBook.country || "-"}</p>
+                <p><strong>Language:</strong> ${currentBook.language || "-"}</p>
+                ${Object.keys(currentBook)
+                    .filter(k => !baseFields.includes(k) && k !== "_id")
+                    .map(k => `<p><strong>${k}:</strong> ${currentBook[k]}</p>`).join("")}
+                <div class="book-actions">
+                    <button class="edit-btn" onclick="openEditModal()"><i class="fa fa-edit"></i> Edit</button>
+                    <button class="delete-btn" onclick="confirmDelete()"><i class="fa fa-trash"></i> Delete</button>
+                </div>
+            </div>
+        </div>`;
+        } catch (err) {
+            container.innerHTML = "<p class='text-danger text-center py-5'>Failed to load book details.</p>";
+            console.error(err);
+        }
+    }
 
-    const book = data.data;
+    // Open edit modal
+    function openEditModal() {
+        const overlay = document.getElementById("editModal");
+        overlay.style.display = "flex";
+        document.body.style.overflow = "hidden";
+        isFormDirty = false;
+        showEditMessage("");
 
-    const container = document.getElementById("data-container");
+        // Prefill base fields
+        baseFields.forEach(f => {
+            const input = document.getElementById(`edit${f.charAt(0).toUpperCase() + f.slice(1)}`);
+            if (input && currentBook[f] !== undefined) input.value = currentBook[f];
+        });
 
-    container.innerHTML = `
-        <div style="border:1px solid #ddd;padding:20px;border-radius:10px;width:400px">
-            <a href="/books/dashboard/">⬅ Back</a>
+        // Prefill dynamic fields
+        const container = document.getElementById("editAdditionalFields");
+        container.innerHTML = "";
+        Object.keys(currentBook).forEach(k => {
+            if (!baseFields.includes(k) && k !== "_id") {
+                addEditField(k, currentBook[k]);
+            }
+        });
 
-            <h3>${book.title}</h3>
+        document.getElementById("editTitle")?.focus();
+    }
 
-            <p><strong>Author:</strong> ${book.author}</p>
-            ${book.year ? `<p><strong>Year:</strong> ${book.year}</p>` : ""}
-            ${book.price ? `<p><strong>Price:</strong> ₹${book.price}</p>` : ""}
-            ${book.pages ? `<p><strong>Pages:</strong> ${book.pages}</p>` : ""}
-            ${book.country ? `<p><strong>Country:</strong> ${book.country}</p>` : ""}
-            ${book.language ? `<p><strong>Language:</strong> ${book.language}</p>` : ""}
+    // Close modal
+    function closeEditModal() {
+        if (isFormDirty && !confirm("Discard unsaved changes?")) return;
+        document.getElementById("editModal").style.display = "none";
+        document.body.style.overflow = "auto";
+        isFormDirty = false;
+    }
 
+    // Add dynamic field
+    function addEditField(name = "", value = "") {
+        const template = document.getElementById("dynamicFieldTemplate");
+        const clone = template.content.cloneNode(true);
+        clone.querySelector(".edit-extra-name").value = name;
+        clone.querySelector(".edit-extra-value").value = value;
+        clone.querySelector(".btn-remove").onclick = e => e.target.closest(".dynamic-field").remove();
+        document.getElementById("editAdditionalFields").appendChild(clone);
+    }
 
-        </div>
-    `;
-})
-.catch(error => console.error("Error:", error));
+    // Show inline message
+    function showEditMessage(msg, isError = false) {
+        const container = document.getElementById("editMsg");
+        container.textContent = msg;
+        container.style.color = isError ? "red" : "green";
+    }
 
+    // Submit edit form
+    document.getElementById("editBookForm").addEventListener("submit", async e => {
+        e.preventDefault();
+        const updatedData = {};
+
+        baseFields.forEach(f => {
+            const input = document.getElementById(`edit${f.charAt(0).toUpperCase() + f.slice(1)}`);
+            if (input && input.value) updatedData[f] = input.value;
+        });
+
+        const dynamicRows = document.querySelectorAll("#editAdditionalFields .dynamic-field");
+        for (let row of dynamicRows) {
+            const keyInput = row.querySelector(".edit-extra-name");
+            const valueInput = row.querySelector(".edit-extra-value");
+            if (!keyInput || !valueInput) continue;
+            const key = keyInput.value.trim();
+            const val = valueInput.value;
+            if (!key) {
+                showEditMessage("All additional fields must have a name!", true);
+                return;
+            }
+            updatedData[key] = val;
+        }
+
+        try {
+            const res = await fetch(`/api/books/${bookId}/update/`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedData)
+            });
+            const data = await res.json();
+            if (data.status === "success") {
+                showEditMessage("Book updated successfully!");
+                isFormDirty = false; // <-- reset the flag
+                setTimeout(() => { closeEditModal(); loadBook(); }, 1000);
+            } else if (data.status === "info") {
+                showEditMessage(data.message); // e.g., "No changes made"
+                isFormDirty = false; // <-- optional, consider it "saved"
+            } else {
+                showEditMessage("Update failed: " + JSON.stringify(data), true);
+            }
+        } catch (err) {
+            console.error(err);
+            showEditMessage("An error occurred during update.", true);
+        }
+    });
+
+    // Delete book
+    async function confirmDelete() {
+        if (!currentBook.title) return;
+        const confirmed = confirm(`Are you sure you want to delete "${currentBook.title}"?`);
+        if (!confirmed) return;
+
+        try {
+            const res = await fetch(`/api/books/${bookId}/delete/`, { method: "DELETE", headers: { "Content-Type": "application/json" } });
+            const data = await res.json();
+            if (data.is_deleted || data.message === "Item deleted successfully") {
+                alert(`Book "${currentBook.title}" has been deleted.`);
+                window.location.href = "/books/dashboard/";
+            } else {
+                alert("Delete failed: " + JSON.stringify(data));
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error deleting book.");
+        }
+    }
+
+    // Track form changes
+    document.getElementById("editBookForm").addEventListener("input", () => isFormDirty = true);
+
+    // Close modal on outside click or ESC
+    window.onclick = e => { if (e.target.id === "editModal") closeEditModal(); }
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeEditModal(); })
+
+    // Initial load
+    loadBook();
 </script>
-
 {% endblock %}
