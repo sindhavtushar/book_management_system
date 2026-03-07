@@ -1,0 +1,247 @@
+/* Page Container */
+.book-page {
+    max-width: 900px;
+    margin: 40px auto;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* Header */
+.book-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.book-header h1 {
+    font-size: 2rem;
+    color: #333;
+}
+
+.btn-back {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-back:hover {
+    background-color: #0056b3;
+}
+
+/* Book Card */
+.book-card {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background-color: #fff;
+}
+
+.book-card img {
+    max-width: 250px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.book-card .book-info {
+    flex: 1;
+}
+
+.book-card .book-info h2 {
+    margin-top: 0;
+    color: #222;
+}
+
+.book-card .book-info p {
+    margin: 5px 0;
+    font-size: 1rem;
+    color: #555;
+}
+
+.book-card .book-actions {
+    margin-top: 15px;
+}
+
+.book-card .book-actions button {
+    padding: 8px 14px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-right: 8px;
+    transition: 0.2s;
+}
+
+.book-card .book-actions .edit-btn {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.book-card .book-actions .edit-btn:hover {
+    background-color: #218838;
+}
+
+.book-card .book-actions .delete-btn {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.book-card .book-actions .delete-btn:hover {
+    background-color: #c82333;
+}
+
+/* Modal Overlay */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 700px;
+    width: 90%;
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.modal-close:hover {
+    background-color: #c82333;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 0.95rem;
+}
+
+/* Add Field Button */
+.btn-add-field {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.btn-add-field:hover {
+    background-color: #218838;
+}
+
+/* Save Button */
+.btn-save {
+    width: 100%;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 0;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.btn-save:hover {
+    background-color: #0056b3;
+}
+
+/* Dynamic Fields */
+
+/* Dynamic Field Row */
+.dynamic-field {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center; /* <-- vertically center all children */
+}
+
+.dynamic-field input {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 0.95rem;
+}
+
+.dynamic-field .btn-remove {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 0 12px;
+    height: 38px;       /* match input height */
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.btn-remove {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-remove:hover {
+    background-color: #c82333;
+}
+
+/* Responsive */
+@media(max-width: 768px){
+    .book-card {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .book-card .book-info {
+        text-align: center;
+    }
+}

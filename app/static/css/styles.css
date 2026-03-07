@@ -1,0 +1,248 @@
+/* ----------------------------
+   General Page Styles
+---------------------------- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f7f8fa;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+h2,
+h3 {
+    margin-top: 0;
+}
+
+.page-title {
+    margin-top: 20px ;
+    margin-bottom: 20px;
+    font-size: 28px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.action-bar-top {
+    display: flex;
+    justify-content: space-between;
+    /* Back left, Add right */
+    align-items: center;
+    /* Vertically center */
+    gap: 10px;
+    /* Space between buttons if needed */
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    flex-wrap: wrap;
+    /* Responsive wrap */
+}
+
+/* ----------------------------
+   Grid / Card Layout
+---------------------------- */
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 10px 20px;
+}
+
+.book-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    background: #fff;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+}
+
+.book-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.book-author {
+    color: #666;
+    margin-bottom: 12px;
+}
+
+/* ----------------------------
+   Modal / Popup Styles
+---------------------------- */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
+    padding: 20px;
+    z-index: 1000;
+}
+
+.popup-content {
+    position: relative;
+    background: #fff;
+    padding: 25px 25px 40px 25px;
+    border-radius: 8px;
+    width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.popup-content h2 {
+    margin-top: 0;
+    font-size: 22px;
+}
+
+/* ----------------------------
+   Form & Inputs
+---------------------------- */
+form label,
+.book-form label {
+    font-weight: 500;
+    display: block;
+    margin-top: 10px;
+}
+
+form input,
+.book-form input {
+    width: 100%;
+    padding: 6px 8px;
+    margin-top: 4px;
+    margin-bottom: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+/* ----------------------------
+   Buttons
+---------------------------- */
+.btn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color .2s ease, transform .1s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Button Variants */
+.btn-primary {
+    background: #007bff;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-success {
+    background: #28a745;
+}
+
+.btn-success:hover {
+    background: #1e7e34;
+}
+
+.btn-danger {
+    background: #dc3545;
+}
+
+.btn-danger:hover {
+    background: #a71d2a;
+}
+
+.btn-secondary {
+    background: #6c757d;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+}
+
+/* Sizes */
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+.btn-lg {
+    padding: 12px 20px;
+    font-size: 16px;
+}
+
+/* Utilities */
+.btn-block {
+    width: 100%;
+}
+
+.btn-icon {
+    padding: 6px;
+}
+
+/* Modal Close Button */
+.modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    line-height: 1;
+}
+
+/* Buttons inside popup */
+.book-form button {
+    margin-top: 15px;
+}
+
+/* ----------------------------
+   Book Detail Card
+---------------------------- */
+.book-detail-card {
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.book-detail-card h3 {
+    margin-top: 0;
+    font-size: 22px;
+}
+
+.book-detail-card p {
+    margin: 8px 0;
+}
+
+/* ----------------------------
+   Responsive
+---------------------------- */
+@media screen and (max-width: 600px) {
+    .book-grid {
+        grid-template-columns: 1fr;
+        padding: 10px;
+    }
+
+    .popup-content {
+        width: 90%;
+    }
+}
