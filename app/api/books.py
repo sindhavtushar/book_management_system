@@ -104,9 +104,9 @@ def update_book(id):
         )
 
         if result.modified_count > 0:
-            return jsonify({"message": "Item updated successfully"}), 200
+            return jsonify({"message": "Item updated successfully", "status": "success"}), 200
         else:
-            return jsonify({"message": "No changes made or item not found"}), 404
+            return jsonify({"message": "No changes made", "status": "info"}), 200
 
     itm["_id"] = str(itm["_id"])  # convert before returning
     return jsonify(itm)
@@ -128,7 +128,7 @@ def delete_book(id):
         if del_res.deleted_count == 1:
             book["_id"] = str(book["_id"])  # Convert ObjectId to string
             return jsonify({
-                "msg": "Record Deleted Successfully!",
+                "is_deleted": True,
                 "deleted_book": book
             }), 200
         else:
