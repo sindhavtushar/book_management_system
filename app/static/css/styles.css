@@ -71,6 +71,11 @@ h3 {
     margin-bottom: 12px;
 }
 
+.book-price {
+    color: #666;
+    margin-bottom: 12px;
+}
+
 /* ----------------------------
    Modal / Popup Styles
 ---------------------------- */

@@ -8,15 +8,32 @@
 
     <h2 class="page-title">Book Management Dashboard</h2>
 
-    <!-- Action Bar -->
     <div class="action-bar action-bar-top">
-        <a href="/" class="btn btn-secondary btn-sm">
-            <i class="fa-solid fa-backward"></i> Back to Home
-        </a>
+        <!-- Left: Back -->
+        <div class="action-left">
+            <a href="/" class="btn btn-secondary btn-sm">
+                <i class="fa-solid fa-backward"></i> Back to Home
+            </a>
+        </div>
 
-        <button class="btn btn-primary" onclick="openAddBookModal()">
-            <i class="fa-solid fa-plus"></i> Add Book
-        </button>
+        <!-- Center: Filter -->
+        <div class="action-center">
+            <label for="filterPrice">Min Price:</label>
+            <input type="number" id="filterPrice" placeholder="Enter minimum price" step="0.01">
+            <button class="btn btn-primary btn-sm" onclick="filterBooksByPrice()">
+                Filter
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="loadBooks()">
+                Reset
+            </button>
+        </div>
+
+        <!-- Right: Add Book -->
+        <div class="action-right">
+            <button class="btn btn-primary" onclick="openAddBookModal()">
+                <i class="fa-solid fa-plus"></i> Add Book
+            </button>
+        </div>
     </div>
 
 
@@ -50,7 +67,7 @@
 
             <label>Year <span style="color: red;">&#42;</span></label>
             <input type="number" name="year">
-            
+
             <label>Language <span style="color: red;">&#42;</span></label>
             <input type="text" name="language">
 
@@ -98,49 +115,42 @@
     ========================= */
 
     function loadBooks() {
-
         fetch('/api/books/list/')
             .then(res => res.json())
-            .then(data => {
-
-                container.innerHTML = "";
-
-                if (!data.length) {
-                    container.innerHTML = "<p>No books available.</p>";
-                    return;
-                }
-
-                data.forEach(book => {
-
-                    const card = document.createElement("div");
-                    card.className = "book-card";
-
-                    card.innerHTML = `
-                    <div class="book-title">${book.title}</div>
-                    <div class="book-author">${book.author}</div>
-
-                    <a href="/books/${book._id}/" class="btn btn-primary btn-sm">
-                        View Details <i class="fa fa-book"></i>
-                    </a>
-                `;
-
-                    container.appendChild(card);
-
-                });
-
-            })
+            .then(data => renderBooks(data))
             .catch(err => {
-
                 console.error(err);
-
-                container.innerHTML =
-                    "<p>❌ Failed to load books.</p>";
-
+                container.innerHTML = "<p>❌ Failed to load books.</p>";
             });
-
     }
 
     loadBooks();
+
+    function renderBooks(data) {
+        container.innerHTML = "";
+
+        if (!data.length) {
+            container.innerHTML = "<p>No books available.</p>";
+            return;
+        }
+
+        data.forEach(book => {
+            const card = document.createElement("div");
+            card.className = "book-card";
+
+            card.innerHTML = `
+            <div class="book-title">${book.title}</div>
+            <div class="book-author">${book.author}</div>
+            <div class="book-price">Price: ${book.price !== undefined ? book.price : '-'} ${book.currency || ''}</div>
+
+            <a href="/books/${book._id}/" class="btn btn-primary btn-sm">
+                View Details <i class="fa fa-book"></i>
+            </a>
+        `;
+
+            container.appendChild(card);
+        });
+    }
 
 
 
@@ -288,6 +298,35 @@
             });
 
     });
+
+    /* =========================
+       Filter Books
+    ========================= */
+
+    function filterBooksByPrice() {
+        const minPrice = document.getElementById("filterPrice").value;
+
+        if (!minPrice) {
+            alert("Please enter a price");
+            return;
+        }
+
+        fetch(`/api/books/price/gt/${minPrice}/`)
+            .then(res => res.json())
+            .then(data => {
+                if (!data.length) {
+                    container.innerHTML = "<p>No books match this price filter.</p>";
+                    return;
+                }
+                renderBooks(data);
+            })
+            .catch(err => {
+                console.error("Price filter error:", err);
+                container.innerHTML = "<p>❌ Failed to filter books by price.</p>";
+            });
+    }
+
+    document.getElementById("filterPrice").addEventListener("input", filterBooksByPrice);
 
 </script>
 

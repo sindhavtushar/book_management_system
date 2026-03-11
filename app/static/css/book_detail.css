@@ -98,6 +98,18 @@
     background-color: #c82333;
 }
 
+/*  */
+.author-link{
+    color:#007BFF;
+    text-decoration:none;
+    font-weight:500;
+}
+
+.author-link:hover{
+    text-decoration:underline;
+}
+/*  */
+
 /* Modal Overlay */
 .overlay {
     display: none;

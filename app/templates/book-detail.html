@@ -8,17 +8,19 @@
 <div class="book-page">
 
     <!-- Header -->
-    <div class="book-header">
-        <a href="/books/dashboard/" class="btn-back"><i class="fa-solid fa-backward"></i> Back</a>
-        <h1>Book Detail</h1>
+    <div class="action-left">
+        <a href="/" class="btn btn-secondary btn-sm">
+            <i class="fa-solid fa-backward"></i> Back to Home
+        </a>
     </div>
-
+    &nbsp;
     <!-- Book Card -->
     <div id="bookCard" class="book-card">
         <div class="loading-msg">Loading book details...</div>
     </div>
 </div>
 
+<!-- Edit Modal -->
 <!-- Edit Modal -->
 <div id="editModal" class="overlay">
     <div class="modal-content">
@@ -42,6 +44,10 @@
                 <div class="form-group">
                     <label>Price</label>
                     <input type="number" id="editPrice" name="price" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Currency</label>
+                    <input type="text" id="editCurrency" name="currency" placeholder="e.g., USD" maxlength="3">
                 </div>
                 <div class="form-group">
                     <label>Pages</label>
@@ -79,7 +85,8 @@
 <script>
     const bookId = "{{ bookId }}";
     let currentBook = {};
-    const baseFields = ["title", "author", "year", "price", "pages", "country", "language", "image"];
+    // const baseFields = ["title", "author", "year", "price", "pages", "country", "language", "image"];
+    const baseFields = ["title", "author", "year", "price", "currency", "pages", "country", "language", "image"];
     let isFormDirty = false;
 
     // Load book details
@@ -88,8 +95,9 @@
         container.innerHTML = '<div class="loading-msg">Loading book details...</div>';
         try {
             const res = await fetch(`/api/books/${bookId}/`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
-            currentBook = data.data;
+            currentBook = data; // API now returns book object directly
 
             container.innerHTML = `
         <div class="book-info-wrapper">
@@ -98,14 +106,19 @@
             </div>
             <div class="book-info">
                 <h2>${currentBook.title || "-"}</h2>
-                <p><strong>Author:</strong> ${currentBook.author || "-"}</p>
+                <p>
+                    <strong>Author:</strong>
+                    ${currentBook.author_id
+                    ? `<a href="/author/${currentBook.author_id}" class="author-link">${currentBook.author}</a>`
+                    : (currentBook.author || "-")
+                }
+                </p>
                 <p><strong>Year:</strong> ${currentBook.year || "-"}</p>
-                <p><strong>Price:</strong> ₹${currentBook.price || "-"}</p>
+                <p><strong>Price:</strong> ${currentBook.price || "-"} ${currentBook.currency || "-"}</p>
                 <p><strong>Pages:</strong> ${currentBook.pages || "-"}</p>
                 <p><strong>Country:</strong> ${currentBook.country || "-"}</p>
                 <p><strong>Language:</strong> ${currentBook.language || "-"}</p>
-                ${Object.keys(currentBook)
-                    .filter(k => !baseFields.includes(k) && k !== "_id")
+                ${Object.keys(currentBook).filter(k => !baseFields.includes(k) && k !== "_id")
                     .map(k => `<p><strong>${k}:</strong> ${currentBook[k]}</p>`).join("")}
                 <div class="book-actions">
                     <button class="edit-btn" onclick="openEditModal()"><i class="fa fa-edit"></i> Edit</button>
@@ -114,8 +127,8 @@
             </div>
         </div>`;
         } catch (err) {
-            container.innerHTML = "<p class='text-danger text-center py-5'>Failed to load book details.</p>";
             console.error(err);
+            container.innerHTML = "<p class='text-danger text-center py-5'>Failed to load book details.</p>";
         }
     }
 
@@ -141,6 +154,12 @@
                 addEditField(k, currentBook[k]);
             }
         });
+
+        //         // Prefill currency
+        // const currencyInput = document.getElementById("editCurrency");
+        // if (currencyInput && currentBook.currency !== undefined) {
+        //     currencyInput.value = currentBook.currency;
+        // }
 
         document.getElementById("editTitle")?.focus();
     }
@@ -201,15 +220,12 @@
                 body: JSON.stringify(updatedData)
             });
             const data = await res.json();
-            if (data.status === "success") {
-                showEditMessage("Book updated successfully!");
-                isFormDirty = false; // <-- reset the flag
+            if (res.ok) {
+                showEditMessage(`Book updated successfully! (${data.modified} fields changed)`);
+                isFormDirty = false;
                 setTimeout(() => { closeEditModal(); loadBook(); }, 1000);
-            } else if (data.status === "info") {
-                showEditMessage(data.message); // e.g., "No changes made"
-                isFormDirty = false; // <-- optional, consider it "saved"
             } else {
-                showEditMessage("Update failed: " + JSON.stringify(data), true);
+                showEditMessage(`Update failed: ${data.error || JSON.stringify(data)}`, true);
             }
         } catch (err) {
             console.error(err);
@@ -224,9 +240,12 @@
         if (!confirmed) return;
 
         try {
-            const res = await fetch(`/api/books/${bookId}/delete/`, { method: "DELETE", headers: { "Content-Type": "application/json" } });
+            const res = await fetch(`/api/books/${bookId}/delete/`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" }
+            });
             const data = await res.json();
-            if (data.is_deleted || data.message === "Item deleted successfully") {
+            if (res.ok && data.is_deleted) {
                 alert(`Book "${currentBook.title}" has been deleted.`);
                 window.location.href = "/books/dashboard/";
             } else {

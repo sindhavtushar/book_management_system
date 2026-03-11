@@ -21,3 +21,7 @@ def book_dashboard():
 def book_detail(id):
     return render_template("book-detail.html", bookId = id)
 
+@views.route("/author/<id>/")
+def author_info(id):
+    return render_template("author-details.html", author_id = id)
+

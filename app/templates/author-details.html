@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Author Information{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/author_details.css') }}">
+
+<div class="author-page">
+
+    <!-- Header -->
+    <div class="author-header">
+        <div class="action-left">
+            <a href="/books/dashboard/" class="btn btn-secondary btn-sm">
+                <i class="fa-solid fa-backward"></i> Back to Home
+            </a>
+        </div>
+        <h1>Author Profile</h1>
+    </div>
+
+    <!-- Author Card -->
+    <div id="authorCard" class="author-card">
+        <p class="loading-msg">Loading author information...</p>
+    </div>
+
+</div>
+
+<script>
+    const authorId = "{{ author_id }}";
+
+    async function loadAuthor() {
+        const card = document.getElementById("authorCard");
+
+        try {
+            const response = await fetch(`/api/author/${authorId}`);
+            const author = await response.json();
+
+            if (!response.ok) {
+                card.innerHTML = `<p class="error-msg">Author not found</p>`;
+                return;
+            }
+
+            card.innerHTML = `
+        <div class="author-layout">
+
+            <!-- Avatar -->
+            <div class="author-avatar">
+                ${author.image
+                    ? `<img src="${author.image}" class="author-img">`
+                    : `<i class="fa-solid fa-user"></i>`
+                }
+            </div>
+
+            <!-- Info -->
+            <div class="author-info">
+                <h2>${author.name}</h2>
+                <div class="author-meta">
+
+                    ${author.country ? `
+                    <div class="meta-item">
+                        <i class="fa-solid fa-earth-americas"></i>
+                        <span>${author.country}</span>
+                    </div>` : ""}
+
+                    ${author.birthYear ? `
+                    <div class="meta-item">
+                        <i class="fa-solid fa-cake-candles"></i>
+                        <span>${author.birthYear}</span>
+                    </div>` : ""}
+
+                    <div class="meta-item">
+                        <i class="fa-solid fa-id-badge"></i>
+                        <span>${author._id}</span>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        `;
+        } catch (err) {
+            card.innerHTML = `<p class="error-msg">Failed to load author information</p>`;
+            console.error(err);
+        }
+    }
+
+    loadAuthor();
+</script>
+
+{% endblock %}
